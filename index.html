@@ -1,201 +1,106 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dear Chinnu ❤️</title>
-
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  overflow-x: hidden;
-  background: linear-gradient(
-    135deg, #ff9a9e, #fad0c4, #fbc2eb
-  );
-  font-family: Georgia, serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  color: #950044;
-}
-
-.card {
-  position: relative;
-  z-index: 2;
-  width: 90%;
-  max-width: 450px;
-  margin: 30px 0;
-  padding: 30px 20px;
-  border-radius: 25px;
-  background: rgba(255,255,255,0.88);
-  box-shadow: 0 10px 35px #b52b5a55;
-}
-
-h1 {
-  font-size: 32px;
-  color: #e91e63;
-  min-height: 45px;
-}
-
-h2 {
-  font-style: italic;
-  color: #b30059;
-}
-
-p {
-  font-size: 19px;
-  line-height: 1.7;
-}
-
-.heart {
-  font-size: 50px;
-  animation: beat 1s infinite;
-}
-
-@keyframes beat {
-  50% { transform: scale(1.3); }
-}
-
-.floating-heart {
-  position: fixed;
-  bottom: -50px;
-  z-index: 1;
-  pointer-events: none;
-  animation: floatUp linear forwards;
-}
-
-@keyframes floatUp {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-110vh);
-    opacity: 0;
-  }
-}
-
-button {
-  background: #e91e63;
-  color: white;
-  border: none;
-  padding: 15px 22px;
-  border-radius: 30px;
-  font-size: 17px;
-  cursor: pointer;
-}
-
-button:active {
-  transform: scale(0.96);
-}
-
-#surprise {
-  display: none;
-  margin-top: 25px;
-  animation: appear 1.5s ease;
-}
-
-@keyframes appear {
-  from { opacity: 0; transform: scale(.8); }
-  to { opacity: 1; transform: scale(1); }
-}
+* { box-sizing: border-box; }
+body { margin:0; min-height:100vh; overflow-x:hidden; background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb); font-family:Georgia,serif; display:flex; align-items:center; justify-content:center; text-align:center; color:#950044; }
+.card { position:relative; z-index:2; width:90%; max-width:450px; margin:30px 0; padding:30px 20px; border-radius:25px; background:rgba(255,255,255,.9); box-shadow:0 10px 35px #b52b5a55; }
+h1 { font-size:32px; color:#e91e63; min-height:45px; }
+h2 { font-style:italic; color:#b30059; }
+p { font-size:19px; line-height:1.7; }
+.heart { font-size:50px; animation:beat 1s infinite; }
+@keyframes beat { 50% { transform:scale(1.3); } }
+.floating-heart { position:fixed; bottom:-50px; z-index:1; pointer-events:none; animation:floatUp linear forwards; }
+@keyframes floatUp { from { transform:translateY(0); opacity:1; } to { transform:translateY(-110vh); opacity:0; } }
+button { background:#e91e63; color:white; border:0; padding:15px 22px; border-radius:30px; font-size:17px; cursor:pointer; margin:6px; }
+button:active { transform:scale(.96); }
+#surprise { display:none; margin-top:25px; animation:appear 1.5s ease; }
+@keyframes appear { from { opacity:0; transform:scale(.8); } to { opacity:1; transform:scale(1); } }
+#musicControls { display:none; margin-top:12px; }
+#musicStatus { font-size:14px; }
+@media (prefers-reduced-motion:reduce) { .heart,.floating-heart,#surprise { animation:none; } }
 </style>
 </head>
-
 <body>
-
 <div class="card">
   <div class="heart">❤️</div>
-
-  <h1 id="typing"></h1>
-
+  <h1 id="typing" aria-label="Dear Chinnu ❤️"></h1>
   <h2>My Love, My World 🌹</h2>
-
-  <p>
-    Every moment with you is a
-    beautiful blessing. 💕
-  </p>
-
-  <button onclick="openSurprise()">
-    💌 Tap to Open My Heart
-  </button>
-
+  <p>Every moment with you is a beautiful blessing. 💕</p>
+  <button id="surpriseButton" type="button" onclick="openSurprise()">💌 Tap to Open My Heart</button>
   <div id="surprise">
     <h2>My Dearest Chinnu 💖</h2>
-
-    <p>
-      You are my happiness,
-      my strength, and
-      my forever love. ❤️
-    </p>
-
-    <p>
-      No matter how many days pass,
-      I will always choose you,
-      again and again. 🥰
-    </p>
-
-    <h2>Forever Yours Navi ❤️</h2>
+    <p>You are my happiness, my strength, and my forever love. ❤️</p>
+    <p>No matter how many days pass, I will always choose you, again and again. 🥰</p>
+    <h2>Forever Yours, Navi ❤️💕</h2>
     <p>💍 💕 🌹 ✨</p>
   </div>
+  <div id="musicControls">
+    <button type="button" id="musicToggle" onclick="toggleMusic()">⏸ Pause Music</button>
+    <p id="musicStatus" role="status" aria-live="polite"></p>
+  </div>
 </div>
-
+<audio id="loveMusic" preload="none" loop>
+  <source src="music/romantic.m4a" type="audio/mp4">
+</audio>
 <script>
-const title = "Dear Chinnu ❤️";
+const characters = Array.from('Dear Chinnu ❤️');
 let i = 0;
-
 function typeText() {
-  if (i < title.length) {
-    const character = Array.from(title)[i];
-    document.getElementById("typing")
-      .textContent += character;
-    i++;
+  if (i < characters.length) {
+    document.getElementById('typing').textContent += characters[i++];
     setTimeout(typeText, 150);
   }
 }
-
 function createHeart() {
-  const heart = document.createElement("div");
-  heart.className = "floating-heart";
-
-  const emojis = ["❤️","💕","💖","🌹","🥰"];
-  heart.textContent =
-    emojis[Math.floor(Math.random()*emojis.length)];
-
-  heart.style.left = Math.random()*95 + "vw";
-  heart.style.fontSize =
-    (18 + Math.random()*25) + "px";
-  heart.style.animationDuration =
-    (4 + Math.random()*4) + "s";
-
+  const heart = document.createElement('div');
+  heart.className = 'floating-heart';
+  const emojis = ['❤️','💕','💖','🌹','🥰'];
+  heart.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  heart.style.left = Math.random()*95 + 'vw';
+  heart.style.fontSize = (18+Math.random()*25)+'px';
+  const duration = 4+Math.random()*4;
+  heart.style.animationDuration = duration+'s';
   document.body.appendChild(heart);
-
-  setTimeout(() => heart.remove(), 8500);
+  setTimeout(()=>heart.remove(), duration*1000+200);
 }
-
-function openSurprise() {
-  document.getElementById("surprise")
-    .style.display = "block";
-
-  for (let j = 0; j < 25; j++) {
-    setTimeout(createHeart, j*100);
+const music = document.getElementById('loveMusic');
+const toggle = document.getElementById('musicToggle');
+const status = document.getElementById('musicStatus');
+async function startMusic() {
+  try {
+    music.volume = 0.5;
+    await music.play();
+    toggle.textContent = '⏸ Pause Music';
+    status.textContent = '🎵 Music is playing';
+  } catch (error) {
+    toggle.textContent = '▶ Play Music';
+    status.textContent = 'Music could not start. Check the audio file and tap Play Music.';
+    console.log('Audio playback error:',error);
   }
 }
-
-window.onload = function() {
+function openSurprise() {
+  document.getElementById('surprise').style.display='block';
+  document.getElementById('surpriseButton').style.display='none';
+  document.getElementById('musicControls').style.display='block';
+  for (let j=0;j<25;j++) setTimeout(createHeart,j*100);
+  startMusic();
+}
+function toggleMusic() {
+  if (music.paused) startMusic();
+  else {
+    music.pause();
+    toggle.textContent='▶ Play Music';
+    status.textContent='Music paused';
+  }
+}
+window.addEventListener('load',()=>{
   typeText();
-  setInterval(createHeart, 500);
-};
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(createHeart,500);
+});
 </script>
-
 </body>
 </html>
-
