@@ -15,7 +15,8 @@
     p { font-size: clamp(21px,4.7vw,29px); line-height: 1.65; }
     button { background: #ff0069; color: white; border: 0; border-radius: 40px; padding: 17px 27px; margin: 15px 6px; font-size: 19px; cursor: pointer; box-shadow: 0 6px 16px rgba(255,0,105,.2); }
     button:active { transform: scale(.97); }
-    #surprise { display: none; animation: reveal .8s ease-out; }
+    button[hidden] { display: none; }
+    #surprise { display: block; animation: reveal 1.2s ease-out both; animation-delay: .7s; }
     .signature { font-size: clamp(27px,6vw,40px); font-style: italic; font-weight: bold; }
     .symbols { font-size: 29px; }
     #musicStatus { min-height: 1.5em; font-size: 16px; color: #9c245b; }
@@ -29,7 +30,6 @@
   <main class="card">
     <div class="big-heart">❤️</div>
     <h1 id="typedTitle" aria-label="Dear Chinnu ❤️"></h1>
-    <button id="surpriseButton" type="button" onclick="openSurprise()">💌 Tap to Open My Heart</button>
     <section id="surprise">
       <h2>My Love, My World 🌹</h2>
       <p>Every moment with you is a beautiful blessing. 💕</p>
@@ -39,7 +39,7 @@
       <p class="signature">Forever Yours, Navi ❤️💕</p>
       <div class="symbols">💍 💕 🌹 ✨</div>
     </section>
-    <button id="musicButton" type="button" onclick="toggleMusic()" style="display:none">▶ Play Music</button>
+    <button id="musicButton" type="button" onclick="toggleMusic()" hidden>🎵 Tap to Enable Music</button>
     <p id="musicStatus" role="status" aria-live="polite"></p>
   </main>
 
@@ -52,7 +52,8 @@
     const music = document.getElementById('loveMusic');
     const musicButton = document.getElementById('musicButton');
     const musicStatus = document.getElementById('musicStatus');
-    let opened = false;
+    music.volume = 0.7;
+    music.loop = true;
 
     function typeText() {
       const text = 'Dear Chinnu ❤️';
@@ -74,42 +75,55 @@
       setTimeout(() => heart.remove(), 10500);
     }
 
-    async function playMusic() {
-      musicStatus.textContent = '';
-      try {
-        // Call play() directly from the user's tap, without waiting for loading.
-        await music.play();
-        musicButton.textContent = '⏸ Pause Music';
-      } catch (error) {
-        musicButton.textContent = '▶ Play Music';
-        musicStatus.textContent = 'Music did not start (' + (error.name || 'playback error') + '). Tap Play Music to retry.';
-      }
+    function showMusicButton(label) {
+      musicButton.hidden = false;
+      musicButton.textContent = label;
     }
 
-    function openSurprise() {
-      if (!opened) {
-        opened = true;
-        document.getElementById('surprise').style.display = 'block';
-        document.getElementById('surpriseButton').style.display = 'none';
-        musicButton.style.display = 'inline-block';
-        for (let i = 0; i < 25; i++) setTimeout(createHeart, i*100);
+    function tryAutoPlay() {
+      // Browsers usually block audible autoplay until a user gesture.
+      const attempt = music.play();
+      if (attempt && typeof attempt.then === 'function') {
+        attempt.then(() => {
+          showMusicButton('⏸ Pause Music');
+          musicStatus.textContent = '';
+        }).catch(() => {
+          showMusicButton('🎵 Tap to Enable Music');
+          musicStatus.textContent = 'Tap once to hear Inthandham ❤️';
+        });
       }
-      // Invoke playback during the button click, which mobile browsers require.
-      playMusic();
     }
 
     function toggleMusic() {
-      if (music.paused) playMusic();
-      else { music.pause(); musicButton.textContent = '▶ Play Music'; musicStatus.textContent = ''; }
+      if (!music.paused) {
+        music.pause();
+        showMusicButton('▶ Play Music');
+        musicStatus.textContent = '';
+        return;
+      }
+      // play() is called synchronously inside the tap handler.
+      const attempt = music.play();
+      if (attempt && typeof attempt.then === 'function') {
+        attempt.then(() => {
+          showMusicButton('⏸ Pause Music');
+          musicStatus.textContent = '';
+        }).catch(error => {
+          showMusicButton('🎵 Tap to Enable Music');
+          musicStatus.textContent = 'Unable to play audio: ' + (error.message || error.name);
+        });
+      }
     }
 
-    music.addEventListener('ended', () => { musicButton.textContent = '▶ Play Music'; });
+    music.addEventListener('ended', () => { showMusicButton('▶ Play Music'); });
     music.addEventListener('error', () => {
       const code = music.error ? music.error.code : 'unknown';
+      showMusicButton('🎵 Tap to Enable Music');
       musicStatus.textContent = 'Audio loading error (code ' + code + '). Check music/romantic.mp3.';
     });
     typeText();
+    for (let i = 0; i < 16; i++) setTimeout(createHeart, i * 140);
     setInterval(createHeart, 700);
+    tryAutoPlay();
   </script>
 </body>
 </html>
